@@ -1,5 +1,8 @@
 ---
 - name: Harden cron system file permissions (Lynis compliance)
+  become: true
+  tags: cron_permissions
+
   block:
 
     - name: Secure /etc/crontab
@@ -43,16 +46,21 @@
         owner: root
         group: root
         mode: '0700'
-  become: true
-  tags:
-    - cron_permissions
 
 - name: Secure /etc/ssh/sshd_config file
+  become: true
+  tags: ssh_config_permissions
   ansible.builtin.file:
     path: /etc/ssh/sshd_config
     owner: root
     group: root
     mode: '0600'
+
+- name: Secure sudoers.d directory ownership
   become: true
-  tags:
-    - ssh_config_permissions
+  tags: cron_permissions
+  ansible.builtin.file:
+    path: /etc/sudoers.d
+    owner: root
+    group: root
+    mode: '0750'
