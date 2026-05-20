@@ -19,3 +19,20 @@
     path: /etc/bash.bashrc
     line: 'umask 077' # Or you can use 027
     state: present
+
+# Controls how many times hashing is repeated.
+- name: Set password hashing rounds
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^#?SHA_CRYPT_MIN_ROUNDS\s+'
+    line: 'SHA_CRYPT_MIN_ROUNDS 10000'
+    state: present
+
+- name: Set max password hashing rounds
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^#?SHA_CRYPT_MAX_ROUNDS\s+'
+    line: 'SHA_CRYPT_MAX_ROUNDS 10000'
+    state: present
