@@ -1,0 +1,21 @@
+---
+- name: Set shell session timeout (auto logout after inactivity)
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    line: 'TMOUT=600'
+    state: present
+
+- name: Set secure default umask system-wide
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    line: 'umask 077' # Or you can use 027
+    state: present
+
+- name: Set secure umask in /etc/bash.bashrc
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/bash.bashrc
+    line: 'umask 077' # Or you can use 027
+    state: present

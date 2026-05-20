@@ -1,0 +1,32 @@
+---
+- name: Install debian packages
+  ansible.builtin.import_tasks: packages-apt.yml
+  tags: install_apt_packages
+
+- name: SSH Hardening
+  ansible.builtin.import_tasks: ssh-hardening.yml
+  tags: ssh_hardening
+
+- name: Fail2ban
+  ansible.builtin.import_tasks: fail2ban.yml
+  tags: fail2ban
+
+- name: PAM Hardening
+  ansible.builtin.import_tasks: pam-debian.yml
+  tags: pam_hardening
+
+- name: File Permissions
+  ansible.builtin.import_tasks: file-permissions.yml
+  tags: file_permissions
+
+- name: Malware Scanner
+  ansible.builtin.import_tasks: malware-scanner.yml
+  tags: malware_scanner
+
+- name: Kernel Hardening
+  ansible.builtin.import_tasks: kernel-hardening.yml
+  tags: kernel_hardening
+
+- name: Common Hardening
+  ansible.builtin.import_tasks: common-hardening.yml
+  tags: common_hardening

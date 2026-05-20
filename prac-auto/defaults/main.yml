@@ -1,0 +1,39 @@
+---
+managed_user_name: ansible
+managed_user_shell: /bin/bash
+managed_user_groups:
+  - sudo
+ssh_port: 23389
+ssh_banner_path: /etc/mybanner
+
+ssh_hardening_settings:
+  - { regexp: '^#?Port\s+', line: 'Port {{ ssh_port }}' }
+  - { regexp: '^#?PubkeyAuthentication\s+', line: 'PubkeyAuthentication yes' }
+  - { regexp: '^#?PasswordAuthentication\s+', line: 'PasswordAuthentication no' }
+  - { regexp: '^#?PermitRootLogin\s+', line: 'PermitRootLogin no' }
+  - { regexp: '^#?AllowTcpForwarding\s+', line: 'AllowTcpForwarding no' }
+  - { regexp: '^#?AllowAgentForwarding\s+', line: 'AllowAgentForwarding no' }
+  - { regexp: '^#?MaxSessions\s+', line: 'MaxSessions 2' }
+  - { regexp: '^#?MaxAuthTries\s+', line: 'MaxAuthTries 3' }
+  - { regexp: '^#?LogLevel\s+', line: 'LogLevel VERBOSE' }
+  - { regexp: '^#?ClientAliveInterval\s+', line: 'ClientAliveInterval 300' }
+  - { regexp: '^#?ClientAliveCountMax\s+', line: 'ClientAliveCountMax 2' }
+  - { regexp: '^#?TCPKeepAlive\s+', line: 'TCPKeepAlive no' }
+  - { regexp: '^#?PermitEmptyPasswords\s+', line: 'PermitEmptyPasswords no' }
+  - { regexp: '^#?X11Forwarding\s+', line: 'X11Forwarding no' }
+  - { regexp: '^#?AllowUsers\s+', line: 'AllowUsers {{ managed_user_name }}' }
+  - { regexp: '^#?Banner\s+', line: 'Banner {{ ssh_banner_path }}' }
+
+fail2ban_sshd_enabled: true
+fail2ban_bantime: "5h"
+fail2ban_findtime: "5m"
+fail2ban_maxretry: 2
+fail2ban_ignoreip:
+  - "127.0.0.1"
+  - "::1"
+fail2ban_jail_local_path: /etc/fail2ban/jail.local
+
+docker_offline_source_dir: "{{ playbook_dir }}/../downloads/docker/ubuntu-noble"
+
+os_auth_pam_passwdqc_options: min=disabled,disabled,16,12,8 # Used in Debian
+

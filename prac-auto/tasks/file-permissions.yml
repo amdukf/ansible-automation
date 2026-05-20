@@ -1,0 +1,58 @@
+---
+- name: Harden cron system file permissions (Lynis compliance)
+  block:
+
+    - name: Secure /etc/crontab
+      ansible.builtin.file:
+        path: /etc/crontab
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Secure /etc/cron.d directory
+      ansible.builtin.file:
+        path: /etc/cron.d
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Secure /etc/cron.daily directory
+      ansible.builtin.file:
+        path: /etc/cron.daily
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Secure /etc/cron.hourly directory
+      ansible.builtin.file:
+        path: /etc/cron.hourly
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Secure /etc/cron.weekly directory
+      ansible.builtin.file:
+        path: /etc/cron.weekly
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Secure /etc/cron.monthly directory
+      ansible.builtin.file:
+        path: /etc/cron.monthly
+        owner: root
+        group: root
+        mode: '0700'
+  become: true
+  tags:
+    - cron_permissions
+
+- name: Secure /etc/ssh/sshd_config file
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: '0600'
+  become: true
+  tags:
+    - ssh_config_permissions

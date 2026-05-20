@@ -1,0 +1,39 @@
+---
+
+- name: Configure the minimum password length
+  block:
+
+    - name: Load Debian vars
+      ansible.builtin.include_vars:
+        file: vars/debian.yml
+
+    - name: Install the package for strong password checking
+      ansible.builtin.apt:
+        name: libpam-passwdqc
+        state: present
+
+    - name: Configure passwdqc
+      ansible.builtin.template:
+        src: pam-configs/pam_passwdqc.j2
+        dest: "{{ passwdqc_path }}"
+        mode: "0644"
+        owner: root
+        group: root
+
+  become: true
+  tags:
+    - os_auth_pam_passwdqc
+
+- name: Limit concurrent logins per user via PAM limits
+  ansible.builtin.lineinfile:
+    path: /etc/security/limits.conf
+    regexp: '^{{ item.user }}\s+hard\s+maxlogins\s+'
+    line: '{{ item.user }} hard maxlogins {{ item.maxlogins }}'
+    state: present
+    create: true
+    backup: true
+  loop:
+    - { user: "{{ managed_user_name }}", maxlogins: 3 }
+  become: true
+  tags:
+    - pam_limits

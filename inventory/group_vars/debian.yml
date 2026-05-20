@@ -1,0 +1,25 @@
+packages:
+- sysstat
+- wget
+- git
+- vim
+- nano
+- bash-completion
+- curl
+- htop
+- iftop
+- jq
+- ncdu
+- unzip
+- net-tools
+- dnsutils
+- atop
+- sudo
+- ntp
+- fail2ban
+- software-properties-common
+- apache2-utils
+- tcpdump
+- telnet
+- iptables-persistent
+- auditd

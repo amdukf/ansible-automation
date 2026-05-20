@@ -1,0 +1,36 @@
+---
+
+- name: Install debian packages
+  ansible.builtin.import_tasks: packages-apt.yml
+  tags: install_apt_packages
+
+- name: Get info
+  ansible.builtin.import_tasks: info.yml
+  tags: os_info
+
+- name: Ubuntu networking
+  ansible.builtin.import_tasks: ubuntu-networking.yml
+  tags: ubuntu-networking
+
+- name: File transfering
+  ansible.builtin.import_tasks: transfer-file.yml
+  tags: copy_files
+
+- name: Hardening-preparing
+  ansible.builtin.import_tasks: debian-hardening.yml
+  tags: debian-hardening
+
+- name: SSH Hardening
+  ansible.builtin.import_tasks: ssh-hardening.yml
+  tags: ssh_hardening
+
+- name: Fail2ban
+  ansible.builtin.import_tasks: fail2ban.yml
+  tags: fail2ban
+
+- name: Install Docker
+  ansible.builtin.import_tasks: install-docker.yml
+
+- name: Reboot if required
+  ansible.builtin.import_tasks: reboot.yml
+  tags: reboot

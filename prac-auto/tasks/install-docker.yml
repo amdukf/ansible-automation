@@ -1,0 +1,127 @@
+---
+- name: Docker online installation
+  block:
+
+    - name: Remove conflicting Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose
+          - docker-compose-v2
+          - docker-doc
+          - podman-docker
+          - containerd
+          - runc
+        state: absent
+        purge: true
+
+    - name: Install required dependencies
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
+
+    - name: Set Docker architecture (APT compatible)
+      ansible.builtin.set_fact:
+        docker_arch: >-
+          {{
+            'amd64' if ansible_architecture == 'x86_64'
+            else 'arm64' if ansible_architecture == 'aarch64'
+            else ansible_architecture
+          }}
+
+    - name: Create APT keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Download Docker GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+
+    - name: Add Docker repository (deb822 format)
+      ansible.builtin.template:
+        src: docker.sources.j2
+        dest: /etc/apt/sources.list.d/docker.sources
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install Docker Engine and plugins
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Ensure Docker service is running
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
+  become: true
+  tags:
+    - docker-install
+
+#### Offline installation tasks (if needed) ####
+# .deb packages should be pre-downloaded and placed in the downloads/docker directory on the control node
+# You have to ensure {{ docker_offline_source_dir }} variable is set to the correct path.
+
+- name: Offline Docker installation
+  block:
+
+    - name: Find offline Docker packages
+      ansible.builtin.find:
+        paths: "{{ docker_offline_source_dir }}"
+        patterns: "*.deb"
+        file_type: file
+      register: docker_offline_found_packages
+      delegate_to: localhost
+      become: false
+
+    - name: Fail if no Docker packages found
+      ansible.builtin.fail:
+        msg: "No offline Docker .deb packages found in {{ docker_offline_source_dir }}"
+      when: docker_offline_found_packages.matched == 0
+
+    - name: Create temp Docker package directory
+      ansible.builtin.file:
+        path: /tmp/docker-packages
+        state: directory
+        mode: "0755"
+
+    - name: Copy offline Docker packages
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "/tmp/docker-packages/{{ item.path | basename }}"
+        mode: "0644"
+      loop: "{{ docker_offline_found_packages.files }}"
+
+    - name: Install Docker packages in order
+      ansible.builtin.shell: |
+        dpkg -i /tmp/docker-packages/{{ item }}*.deb || apt-get install -f -y
+      loop:
+        - containerd.io
+        - docker-ce-cli
+        - docker-ce_
+        - docker-buildx-plugin
+        - docker-compose-plugin
+      register: docker_install_results
+      changed_when: docker_install_results.rc == 0
+
+  become: true
+  tags:
+    - docker-install-offline

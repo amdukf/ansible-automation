@@ -1,0 +1,6 @@
+---
+- name: Basic commands
+  hosts: all
+  gather_facts: true
+  roles:
+    - prac-auto

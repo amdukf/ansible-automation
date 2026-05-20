@@ -1,0 +1,19 @@
+---
+- name: Load netplan variables
+  ansible.builtin.include_vars:
+    file: vars/netplan.yml
+  tags:
+    - netplan
+
+- name: Deploy static route via netplan
+  ansible.builtin.template:
+    src: 99-static-routes.yaml.j2
+    dest: /etc/netplan/99-static-routes.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: Apply netplan
+  tags:
+    - netplan
+    - netplan-add-static-route

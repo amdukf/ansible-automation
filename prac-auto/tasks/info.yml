@@ -1,0 +1,26 @@
+---
+
+- name: Display OS release
+  ansible.builtin.debug:
+    msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+  tags: os_release_info
+
+- name: Show key system info
+  ansible.builtin.debug:
+    msg:
+      - "CPU Cores: {{ ansible_processor_vcpus }}"
+      - "Memory: {{ ansible_memtotal_mb }} MB"
+      - "Disk: {{ (ansible_mounts | selectattr('mount', 'equalto', '/') | map(attribute='size_total') | first / 1024 / 1024 / 1024) | round(2) }} GB"
+  tags: system_info
+
+- name: Get default IPv4 interface
+  ansible.builtin.debug:
+    msg: "Default interface: {{ ansible_default_ipv4.interface }}"
+  tags: default_ipv4.interface_info
+
+- name: Show system architecture and distribution_release
+  ansible.builtin.debug:
+    msg:
+      - "Architecture: {{ ansible_architecture }}"
+      - "Distribution Release: {{ ansible_distribution_release }}"
+  tags: system_arch_info

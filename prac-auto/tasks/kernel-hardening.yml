@@ -1,0 +1,236 @@
+---
+- name: USB security hardening (disable USB storage)
+  become: true
+  tags: usb_security
+  block:
+
+    - name: Disable usb-storage kernel module (blacklist)
+      ansible.builtin.lineinfile:
+        path: /etc/modprobe.d/disable-usb-storage.conf
+        create: true
+        line: "blacklist usb-storage"
+        state: present
+
+    - name: Prevent usb-storage module from loading via install override
+      ansible.builtin.lineinfile:
+        path: /etc/modprobe.d/disable-usb-storage.conf
+        line: "install usb-storage /bin/true"
+        state: present
+
+    - name: Update initramfs to persist changes (Debian/Ubuntu)
+      ansible.builtin.command: update-initramfs -u
+
+- name: Kernel Hardening (Lynis compliance)
+  become: true
+  tags: sysctl_hardening
+  block:
+
+# This controls whether kernel memory addresses are exposed to userspace.
+    - name: Harden kernel.kptr_restrict
+      become: true
+      ansible.builtin.sysctl:
+        name: kernel.kptr_restrict
+        value: '2'  # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# It allows low-level system control via keyboard
+    - name: Disable kernel.sysrq
+      become: true
+      ansible.builtin.sysctl:
+        name: kernel.sysrq
+        value: '0'  # Default is 176 or 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# It allows the system to accept routing changes suggested by other devices.
+    - name: Disable IPv4 ICMP redirects (all interfaces)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.all.accept_redirects
+        value: '0' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+    - name: Disable IPv4 ICMP redirects (default)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.default.accept_redirects
+        value: '0' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+    - name: Disable IPv6 ICMP redirects (all)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv6.conf.all.accept_redirects
+        value: '0' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+    - name: Disable IPv6 ICMP redirects (default)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv6.conf.default.accept_redirects
+        value: '0' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Allows your server to tell others: Use a better route
+    - name: Disable IPv4 send redirects (all interfaces)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.all.send_redirects
+        value: '0' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+    - name: Disable IPv4 send redirects (default)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.default.send_redirects
+        value: '0' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Reverse Path Filtering, Does the incoming packet come from a valid route back to its source?
+    - name: Enable Reverse Path Filtering (all interfaces)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.all.rp_filter
+        value: '1' # Default is 2
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+    - name: Enable Reverse Path Filtering (default)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.default.rp_filter
+        value: '1' # Default is 2
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Logs impossible or suspicious packets:
+    - name: Log suspicious IPv4 packets (martians) - all interfaces
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.all.log_martians
+        value: '1' # Default is 0
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+    - name: Log suspicious IPv4 packets (martians) - default
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.default.log_martians
+        value: '1' # Default is 0
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# controls whether Linux is allowed to automatically load extra terminal/serial communication features when needed.
+# a small kernel module that changes how data is handled for those devices. (USB serial adapters, modems, consoles, etc.)
+    - name: Disable TTY line discipline auto-loading
+      become: true
+      ansible.builtin.sysctl:
+        name: dev.tty.ldisc_autoload
+        value: '0' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Protects FIFO (named pipe) files from abuse in world-writable directories like /tmp.
+    - name: Enable FIFO protection
+      become: true
+      ansible.builtin.sysctl:
+        name: fs.protected_fifos
+        value: '2' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Prevents core dumps from SUID binaries.
+    - name: Disable SUID core dumps
+      become: true
+      ansible.builtin.sysctl:
+        name: fs.suid_dumpable
+        value: '0' # Default is 2
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Adds PID to core dump filenames. Avoids overwriting dump files and improves traceability.
+    - name: Enable PID in core dump filenames
+      become: true
+      ansible.builtin.sysctl:
+        name: kernel.core_uses_pid
+        value: '1' # Default is 0
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Blocks unprivileged users from using eBPF.
+# Some observability/debugging tools use eBPF, like falco, cillium, advance monitoring tools, etc. So be careful when enabling this on production servers.
+    - name: Restrict unprivileged eBPF usage
+      become: true
+      ansible.builtin.sysctl:
+        name: kernel.unprivileged_bpf_disabled
+        value: '1' # Default is 2
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Hardens the eBPF JIT compiler against attacks.
+# Some observability/debugging tools use eBPF, like falco, cillium, advance monitoring tools, etc. So be careful when enabling this on production servers.
+    - name: Harden BPF JIT compiler
+      become: true
+      ansible.builtin.sysctl:
+        name: net.core.bpf_jit_harden
+        value: '2' # Default is 0
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Disables source-routed packets. Can bypass routing policies and aid spoofing attacks.
+    - name: Disable IPv4 source-routed packets (default)
+      become: true
+      ansible.builtin.sysctl:
+        name: net.ipv4.conf.default.accept_source_route
+        value: '0' # Default is 1
+        sysctl_file: /etc/sysctl.d/99-hardening.conf
+        state: present
+        reload: true
+
+# Controls whether your server can route packets between networks.
+# If you want to disable it, change the value to 0
+- name: Enable IPv4 packet forwarding (server mode only)
+  become: true
+  tags: net.ipv4.conf.all.forwarding_enable
+  ansible.builtin.sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: '1' # Default is 0
+    sysctl_file: /etc/sysctl.d/99-hardening.conf
+    state: present
+    reload: true
+
+# This controls whether kernel modules can be loaded or not. DO NOT USE IN CEPH CLUSTERS AND KUBERNETES NODES
+# - name: Disable kernel module loading
+#   become: true
+#   tags: kernel_module_hardening_disable
+#   ansible.builtin.sysctl:
+#     name: kernel.modules_disabled
+#     value: '1'  # Default is 0
+#     sysctl_file: /etc/sysctl.d/99-hardening.conf
+#     state: present
+#     reload: true

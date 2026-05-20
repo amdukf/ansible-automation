@@ -1,0 +1,100 @@
+---
+- name: Ensure managed user exists
+  ansible.builtin.user:
+    name: "{{ managed_user_name }}"
+    shell: "{{ managed_user_shell }}"
+    create_home: true
+    state: present
+    groups: "{{ managed_user_groups }}"
+    append: true
+  become: true
+  tags:
+    - user_management
+
+- name: Create .ssh directory for managed user
+  ansible.builtin.file:
+    path: "/home/{{ managed_user_name }}/.ssh"
+    state: directory
+    owner: "{{ managed_user_name }}"
+    group: "{{ managed_user_name }}"
+    mode: "0700"
+  become: true
+  tags:
+    - ssh_setup
+
+- name: Add authorized public key for managed user
+  ansible.posix.authorized_key:
+    user: "{{ managed_user_name }}"
+    state: present
+    key: "{{ vault_managed_user_public_key }}"
+  become: true
+  tags:
+    - ssh_setup
+
+- name: Allow managed user sudo without password
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ managed_user_name }}"
+    content: "{{ managed_user_name }} ALL=(ALL) NOPASSWD: ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "/usr/sbin/visudo -cf %s"
+  become: true
+  tags:
+    - sudoers
+
+- name: Apply SSH hardening settings
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    backup: true
+  loop: "{{ ssh_hardening_settings }}"
+  become: true
+  notify: Restart SSH
+
+- name: Copy file with owner and permissions
+  tags: login_banners
+  become: true
+  ansible.builtin.copy:
+    src: mybanner
+    dest: /etc/mybanner
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart SSH
+
+- name: Harden login banners - /etc/issue
+  tags: login_banners
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/issue
+    content: |
+      Unauthorized access to this system is prohibited.
+      All activities are monitored and logged.
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Harden login banners - /etc/issue.net
+  tags: login_banners
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/issue.net
+    content: |
+      Unauthorized access to this system is prohibited.
+      All activities are monitored and logged.
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Set system MOTD
+  tags: login_banners
+  become: true
+  ansible.builtin.copy:
+    src: motd
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: '0644'

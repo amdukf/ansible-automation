@@ -1,0 +1,11 @@
+---
+all:
+  children:
+    debian:
+      hosts:
+        prac-auto:
+          ansible_host: 192.168.56.74
+          ansible_port: 23389
+
+    rpm:
+      hosts: {}

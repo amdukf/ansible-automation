@@ -1,0 +1,39 @@
+---
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  listen: Restart SSH
+
+- name: Restart SSH socket
+  ansible.builtin.systemd:
+    name: ssh.socket
+    state: restarted
+  become: true
+  listen: Restart SSH
+
+- name: Restart SSH service
+  ansible.builtin.systemd:
+    name: ssh.service
+    state: restarted
+  become: true
+  listen: Restart SSH
+
+- name: Validate netplan config
+  ansible.builtin.command: netplan generate
+  become: true
+  changed_when: false
+  listen: Apply netplan
+
+- name: Apply netplan
+  ansible.builtin.command: netplan apply
+  become: true
+  changed_when: false # Just because of ansible lint
+  listen: Apply netplan
+
+- name: Restart Fail2Ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: restarted
+    enabled: true
+  become: true
