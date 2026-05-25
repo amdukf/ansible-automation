@@ -36,3 +36,49 @@
     regexp: '^#?SHA_CRYPT_MAX_ROUNDS\s+'
     line: 'SHA_CRYPT_MAX_ROUNDS 10000'
     state: present
+
+- name: Ensure hostname is mapped locally in /etc/hosts
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "127.0.0.1 {{ ansible_hostname }}"
+    state: present
+
+- name: Set minimum password age
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^#?PASS_MIN_DAYS\s+'
+    line: 'PASS_MIN_DAYS 1' # Default is 0
+    state: present
+
+- name: Set maximum password age
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^#?PASS_MAX_DAYS\s+'
+    line: 'PASS_MAX_DAYS 60' # Default is 99999
+    state: present
+
+- name: Set UMASK in login.defs
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^UMASK'
+    line: 'UMASK 027'
+    state: present
+
+- name: Docker online installation
+  become: true
+  tags: aide
+  block:
+
+    - name: Initialize AIDE database (first run only)
+      ansible.builtin.command: aideinit
+      args:
+        creates: /var/lib/aide/aide.db
+
+    - name: Move AIDE database into place
+      ansible.builtin.command: mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+      args:
+        creates: /var/lib/aide/aide.db
