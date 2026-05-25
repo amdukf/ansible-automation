@@ -3,6 +3,9 @@
   ansible.builtin.user:
     name: "{{ managed_user_name }}"
     shell: "{{ managed_user_shell }}"
+    password_expire_max: 99999
+    password_expire_min: 0
+    password_expire_warn: 7
     create_home: true
     state: present
     groups: "{{ managed_user_groups }}"
