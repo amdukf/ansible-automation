@@ -36,4 +36,3 @@ fail2ban_jail_local_path: /etc/fail2ban/jail.local
 docker_offline_source_dir: "{{ playbook_dir }}/../downloads/docker/ubuntu-noble"
 
 os_auth_pam_passwdqc_options: min=disabled,disabled,16,12,8 # Used in Debian
-

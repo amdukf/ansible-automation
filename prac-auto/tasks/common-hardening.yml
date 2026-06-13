@@ -68,7 +68,7 @@
     line: 'UMASK 027'
     state: present
 
-- name: Docker online installation
+- name: AIDE file and directory integrity checker
   become: true
   tags: aide
   block:

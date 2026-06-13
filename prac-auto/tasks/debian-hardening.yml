@@ -19,9 +19,9 @@
   ansible.builtin.import_tasks: file-permissions.yml
   tags: file_permissions
 
-- name: Malware Scanner
-  ansible.builtin.import_tasks: malware-scanner.yml
-  tags: malware_scanner
+# - name: Malware Scanner
+#   ansible.builtin.import_tasks: malware-scanner.yml
+#   tags: malware_scanner
 
 - name: Kernel Hardening
   ansible.builtin.import_tasks: kernel-hardening.yml

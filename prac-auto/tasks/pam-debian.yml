@@ -1,6 +1,8 @@
 ---
 
 - name: Configure the minimum password length
+  become: true
+  tags: os_auth_pam_passwdqc
   block:
 
     - name: Load Debian vars
@@ -20,11 +22,9 @@
         owner: root
         group: root
 
-  become: true
-  tags:
-    - os_auth_pam_passwdqc
-
 - name: Limit concurrent logins per user via PAM limits
+  become: true
+  tags: pam_limits
   ansible.builtin.lineinfile:
     path: /etc/security/limits.conf
     regexp: '^{{ item.user }}\s+hard\s+maxlogins\s+'
@@ -32,8 +32,8 @@
     state: present
     create: true
     backup: true
+    owner: root
+    group: root
+    mode: '0644'
   loop:
     - { user: "{{ managed_user_name }}", maxlogins: 3 }
-  become: true
-  tags:
-    - pam_limits

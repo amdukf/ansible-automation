@@ -1,5 +1,7 @@
 ---
 - name: Docker online installation
+  become: true
+  tags: docker-install
   block:
 
     - name: Remove conflicting Docker packages
@@ -72,15 +74,14 @@
         state: started
         enabled: true
 
-  become: true
-  tags:
-    - docker-install
 
 #### Offline installation tasks (if needed) ####
 # .deb packages should be pre-downloaded and placed in the downloads/docker directory on the control node
 # You have to ensure {{ docker_offline_source_dir }} variable is set to the correct path.
 
 - name: Offline Docker installation
+  become: true
+  tags: docker-install-offline
   block:
 
     - name: Find offline Docker packages
@@ -121,7 +122,3 @@
         - docker-compose-plugin
       register: docker_install_results
       changed_when: docker_install_results.rc == 0
-
-  become: true
-  tags:
-    - docker-install-offline
