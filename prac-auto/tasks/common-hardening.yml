@@ -68,17 +68,43 @@
     line: 'UMASK 027'
     state: present
 
-- name: AIDE file and directory integrity checker
+# - name: AIDE file and directory integrity checker
+#   become: true
+#   tags: aide
+#   block:
+
+#     - name: Initialize AIDE database (first run only)
+#       ansible.builtin.command: aideinit
+#       args:
+#         creates: /var/lib/aide/aide.db
+#     - name: Move AIDE database into place
+#       ansible.builtin.command: mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+#       args:
+#         creates: /var/lib/aide/aide.db
+
+- name: Auditd configuration and custom rules
   become: true
-  tags: aide
+  tags: auditd
   block:
 
-    - name: Initialize AIDE database (first run only)
-      ansible.builtin.command: aideinit
-      args:
-        creates: /var/lib/aide/aide.db
-
-    - name: Move AIDE database into place
-      ansible.builtin.command: mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
-      args:
-        creates: /var/lib/aide/aide.db
+    - name: Ensure auditd is installed
+      ansible.builtin.package:
+        name: auditd
+        state: present
+    - name: Set auditd custom rules
+      ansible.builtin.copy:
+        src: auditd-custom.rules
+        dest: /etc/audit/rules.d/custom.rules
+        owner: root
+        group: root
+        mode: '0640'
+      notify: Restart auditd
+    - name: Deploy auditd configuration
+      become: true
+      ansible.builtin.template:
+        src: auditd.conf.j2
+        dest: /etc/audit/auditd.conf
+        owner: root
+        group: root
+        mode: '0640'
+      notify: Restart auditd

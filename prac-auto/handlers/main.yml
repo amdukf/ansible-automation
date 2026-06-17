@@ -37,3 +37,10 @@
     state: restarted
     enabled: true
   become: true
+
+- name: Restart auditd
+  ansible.builtin.systemd:
+    name: auditd
+    state: restarted
+    enabled: true
+  become: true
