@@ -103,17 +103,17 @@
     mode: '0644'
 
 - name: Configure clean MOTD
-  become: yes
-  tasks:
+  become: true
+  block:
 
     - name: Disable dynamic MOTD scripts
-      file:
+      ansible.builtin.file:
         path: /etc/update-motd.d/00-header
         mode: '0644'
         state: file
 
     - name: Disable all default MOTD scripts (Ubuntu noise)
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         mode: '0644'
         state: file
@@ -122,10 +122,10 @@
         - /etc/update-motd.d/50-motd-news
         - /etc/update-motd.d/91-release-upgrade
         - /etc/update-motd.d/90-updates-available
-      ignore_errors: yes
+      failed_when: false
 
     - name: Remove execute permissions from MOTD scripts
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         mode: '0644'
       loop: "{{ lookup('fileglob', '/etc/update-motd.d/*', wantlist=True) }}"

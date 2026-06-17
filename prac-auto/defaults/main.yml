@@ -36,3 +36,28 @@ fail2ban_jail_local_path: /etc/fail2ban/jail.local
 docker_offline_source_dir: "{{ playbook_dir }}/../downloads/docker/ubuntu-noble"
 
 os_auth_pam_passwdqc_options: min=disabled,disabled,16,12,8 # Used in Debian
+
+# Auditd settings
+auditd_local_events: true # The original value is yes, because of ansible lint we set it here true and we ternate it in the template to yes
+auditd_write_logs: true # The original value is yes, because of ansible lint we set it here true and we ternate it in the template to yes
+auditd_log_file: /var/log/audit/audit.log
+auditd_log_group: adm
+auditd_log_format: ENRICHED
+auditd_flush: INCREMENTAL_ASYNC
+auditd_freq: 50
+auditd_max_log_file: 100
+auditd_num_logs: 10
+auditd_priority_boost: 4
+auditd_name_format: HOSTNAME
+auditd_max_log_file_action: ROTATE
+auditd_space_left: 1000
+auditd_space_left_action: SYSLOG
+auditd_admin_space_left: 500
+auditd_admin_space_left_action: SYSLOG
+auditd_disk_full_action: SYSLOG
+auditd_disk_error_action: SYSLOG
+auditd_q_depth: 2000
+auditd_overflow_action: SYSLOG
+auditd_max_restarts: 10
+auditd_plugin_dir: /etc/audit/plugins.d
+auditd_end_of_event_timeout: 2
