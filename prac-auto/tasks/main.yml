@@ -1,7 +1,7 @@
 ---
 
 - name: Install debian packages
-  ansible.builtin.import_tasks: packages-apt.yml
+  ansible.builtin.import_tasks: apt.yml
   tags: install_apt_packages
 
 - name: Get info

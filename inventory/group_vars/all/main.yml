@@ -1,7 +1,7 @@
 # Use password or ssh_key
-ansible_user: ansible
+ansible_user: vagrant
 # ssh_key or password
-ansible_connection_method: ssh_key
+ansible_connection_method: password
 ansible_ssh_private_key_file: >-
   {{ '~/.ssh/id_ed25519' if ansible_connection_method == 'ssh_key' else omit }}
 ansible_ssh_pass: >-

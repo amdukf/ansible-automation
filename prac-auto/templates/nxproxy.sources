@@ -1,0 +1,17 @@
+Types: deb
+URIs: {{ apt_repo_url }}
+Suites: noble noble-updates
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/nx-apt.gpg
+
+Types: deb
+URIs: {{ apt_repo_url }}
+Suites: noble-backports
+Components: main universe multiverse
+Signed-By: /usr/share/keyrings/nx-apt.gpg
+
+Types: deb
+URIs: {{ apt_security_repo_url }}
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/nx-apt.gpg
