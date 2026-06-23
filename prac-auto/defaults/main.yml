@@ -61,3 +61,15 @@ auditd_overflow_action: SYSLOG
 auditd_max_restarts: 10
 auditd_plugin_dir: /etc/audit/plugins.d
 auditd_end_of_event_timeout: 2
+
+# Apt repository settings and credentials
+nx_apt_public_signing_key: {{ playbook_dir }}/../downloads/docker/ubuntu-noble
+
+
+
+apt_repo_url: http://192.168.56.99:8081/repository/ubuntu/
+apt_repo_user: nx-apt
+apt_repo_password: duke123@
+apt_security_repo_url: http://192.168.56.99:8081/repository/ubuntu-security/
+apt_security_repo_user: nx-apt
+apt_security_repo_password: duke123@

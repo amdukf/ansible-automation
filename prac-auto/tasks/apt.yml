@@ -1,0 +1,62 @@
+---
+
+- name: Apt repository settings and credentials
+  become: true
+  tags: apt_repo
+  block:
+
+    - name: Copy nx apt public signing key
+      ansible.builtin.copy:
+        src: "nx-apt-public.key"
+        dest: "/tmp/nx-apt-public.key"
+        mode: "0640"
+
+    - name: Check if default file exists
+      ansible.builtin.stat:
+        path: /etc/apt/sources.list.d/ubuntu.sources
+      register: default_file
+
+    - name: Rename file if it exists
+      ansible.builtin.command: mv /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sources.bak
+      when: default_file.stat.exists
+
+    - name: Apt repository settings
+      become: true
+      tags: apt_repo
+      ansible.builtin.template:
+        src: nx-apt.conf.j2
+        dest: /etc/apt/auth.conf.d/nx-apt.conf
+        owner: root
+        group: root
+        mode: '0640'
+
+    - name: Apt repository credentials
+      become: true
+      tags: apt_repo
+      ansible.builtin.template:
+        src: nx-apt.conf.j2
+        dest: /etc/apt/auth.conf.d/nx-apt.conf
+        owner: root
+        group: root
+        mode: '0640'
+
+- name: Update apt packages
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  tags: apt_update
+
+- name: Upgrade apt packages
+  ansible.builtin.apt:
+    upgrade: true
+  become: true
+  tags: apt_upgrade
+
+- name: Install basic tools
+  ansible.builtin.apt:
+    name: "{{ packages }}"
+    state: present
+    force_apt_get: true
+    update_cache: true
+  become: true
+  tags: apt_basic_tools
