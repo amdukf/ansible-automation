@@ -2,7 +2,7 @@
 
 - name: Apt repository settings and credentials
   become: true
-  tags: apt_repo
+  when: configure_apt_repo | default(false) | bool
   block:
 
     - name: Copy nx apt public signing key
@@ -17,15 +17,27 @@
       register: default_file
 
     - name: Rename file if it exists
-      ansible.builtin.command: mv /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sources.bak
+      ansible.builtin.command: >
+        mv /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sources.bak
       when: default_file.stat.exists
+
+    - name: Check if nx_apt_keyring file exists
+      ansible.builtin.stat:
+        path: /usr/share/keyrings/nx-apt.gpg
+      register: nx_apt_keyring
+
+    - name: Dearmor NX apt public signing key
+      become: true
+      ansible.builtin.command: >
+        gpg --dearmor -o /usr/share/keyrings/nx-apt.gpg /tmp/nx-apt-public.key
+      when: not nx_apt_keyring.stat.exists
 
     - name: Apt repository settings
       become: true
       tags: apt_repo
       ansible.builtin.template:
-        src: nx-apt.conf.j2
-        dest: /etc/apt/auth.conf.d/nx-apt.conf
+        src: nxproxy.sources.j2
+        dest: /etc/apt/sources.list.d/nx-proxy.sources
         owner: root
         group: root
         mode: '0640'
@@ -39,6 +51,15 @@
         owner: root
         group: root
         mode: '0640'
+
+- name: Set APT acquire timeout
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/99timeout
+    content: |
+      Acquire::http::Timeout "60";
+      Acquire::https::Timeout "60";
+      Acquire::Retries "2";
 
 - name: Update apt packages
   ansible.builtin.apt:

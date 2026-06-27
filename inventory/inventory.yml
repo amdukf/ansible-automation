@@ -4,7 +4,7 @@ all:
     debian:
       hosts:
         prac-auto:
-          ansible_host: 192.168.56.100
+          ansible_host: 192.168.56.101
           ansible_port: 22
 
     rpm:
