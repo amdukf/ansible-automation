@@ -64,7 +64,7 @@ This role follows these principles:
 * Some tasks may behave differently depending on the Linux distribution.
 * SSH configuration changes (like port modification) should be tested carefully to avoid losing connectivity.
 * Networking-related tasks are optional and may be extended for different systems (Netplan, NetworkManager, etc.).
-
+* If you want to use *Apt repository settings and credentials* task in apt, you should pass `-e configure_apt_repo=true` to the command.
 ---
 
 # License
