@@ -62,10 +62,9 @@ auditd_max_restarts: 10
 auditd_plugin_dir: /etc/audit/plugins.d
 auditd_end_of_event_timeout: 2
 
-# Apt repository settings and credentials, Change the values to your own repository URL and credentials. 
+# Apt repository settings and credentials, Change the values to your own repository URL and credentials.
 # The password (apt_repo_password and apt_security_repo_password) are in the vault for security reasons.
 apt_repo_url: http://192.168.56.99:8081/repository/ubuntu/
 apt_repo_user: nx-apt
 apt_security_repo_url: http://192.168.56.99:8081/repository/ubuntu-security/
 apt_security_repo_user: nx-apt
-
