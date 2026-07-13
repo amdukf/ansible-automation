@@ -1,0 +1,6 @@
+---
+- name: Docker and Docker Compose Installation and Uninstallation
+  hosts: all
+  gather_facts: true
+  roles:
+    - docker

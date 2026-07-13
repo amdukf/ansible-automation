@@ -1,0 +1,6 @@
+---
+- name: Networking Configuration
+  hosts: all
+  gather_facts: true
+  roles:
+    - networking

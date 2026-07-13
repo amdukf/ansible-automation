@@ -23,4 +23,3 @@ packages:
 - telnet
 - iptables-persistent
 - auditd
-- aide

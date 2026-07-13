@@ -68,20 +68,6 @@
     line: 'UMASK 027'
     state: present
 
-# - name: AIDE file and directory integrity checker
-#   become: true
-#   tags: aide
-#   block:
-
-#     - name: Initialize AIDE database (first run only)
-#       ansible.builtin.command: aideinit
-#       args:
-#         creates: /var/lib/aide/aide.db
-#     - name: Move AIDE database into place
-#       ansible.builtin.command: mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
-#       args:
-#         creates: /var/lib/aide/aide.db
-
 - name: Auditd configuration and custom rules
   become: true
   tags: auditd

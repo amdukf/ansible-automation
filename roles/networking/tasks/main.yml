@@ -1,0 +1,4 @@
+---
+- name: Ubuntu networking
+  ansible.builtin.import_tasks: ubuntu-networking.yml
+  tags: ubuntu-networking

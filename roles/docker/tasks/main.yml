@@ -1,0 +1,12 @@
+---
+- name: Install docker (Online)
+  import_tasks: install-docker.yml
+  tags: install_docker
+
+- name: Install docker (Offline)
+  import_tasks: install-docker-offline.yml
+  tags: install_docker-offline
+
+- name: Uninstall docker
+  import_tasks: uninstall-docker.yml
+  tags: uninstall_docker

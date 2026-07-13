@@ -3,9 +3,9 @@ all:
   children:
     debian:
       hosts:
-        prac-auto:
-          ansible_host: 192.168.56.101
-          ansible_port: 22
+        machine:
+          ansible_host: 77.110.97.177
+          ansible_port: 23389
 
     rpm:
       hosts: {}

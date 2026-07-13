@@ -6,6 +6,10 @@ The roles are designed to be reusable, modular, and easy to maintain. They can b
 
 ## Current Roles
 
+- docker
+- hardening
+- networking
+
 ### Linux Hardening
 
 This role applies basic security hardening to Linux systems, including:

@@ -1,6 +1,6 @@
 ---
-- name: Basic commands
+- name: Hardening playbook
   hosts: all
   gather_facts: true
   roles:
-    - prac-auto
+    - hardening

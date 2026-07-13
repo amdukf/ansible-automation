@@ -106,26 +106,16 @@
   become: true
   block:
 
-    - name: Disable dynamic MOTD scripts
-      ansible.builtin.file:
-        path: /etc/update-motd.d/00-header
-        mode: '0644'
-        state: file
+    - name: Find all MOTD scripts on remote host
+      ansible.builtin.find:
+        paths: /etc/update-motd.d
+        file_type: file
+      register: motd_scripts
 
-    - name: Disable all default MOTD scripts (Ubuntu noise)
+    - name: Remove execute permissions from all MOTD scripts
       ansible.builtin.file:
-        path: "{{ item }}"
-        mode: '0644'
-        state: file
-      loop:
-        - /etc/update-motd.d/10-help-text
-        - /etc/update-motd.d/50-motd-news
-        - /etc/update-motd.d/91-release-upgrade
-        - /etc/update-motd.d/90-updates-available
-      failed_when: false
-
-    - name: Remove execute permissions from MOTD scripts
-      ansible.builtin.file:
-        path: "{{ item }}"
-        mode: '0644'
-      loop: "{{ lookup('fileglob', '/etc/update-motd.d/*', wantlist=True) }}"
+        path: "{{ item.path }}"
+        mode: 'a-x'
+      loop: "{{ motd_scripts.files }}"
+      loop_control:
+        label: "{{ item.path }}"

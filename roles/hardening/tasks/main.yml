@@ -1,0 +1,13 @@
+---
+
+- name: Get info
+  ansible.builtin.import_tasks: info.yml
+  tags: os_info
+
+- name: Hardening-preparing
+  ansible.builtin.import_tasks: debian-hardening.yml
+  tags: debian-hardening
+
+- name: Reboot if required
+  ansible.builtin.import_tasks: reboot.yml
+  tags: reboot

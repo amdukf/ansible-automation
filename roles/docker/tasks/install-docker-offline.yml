@@ -1,0 +1,46 @@
+---
+#### Offline installation tasks (if needed) ####
+# .deb packages should be pre-downloaded and placed in the downloads/docker directory on the control node
+# You have to ensure {{ docker_offline_source_dir }} variable is set to the correct path.
+
+- name: Offline Docker installation
+  become: true
+  block:
+    - name: Find offline Docker packages
+      ansible.builtin.find:
+        paths: "{{ docker_offline_source_dir }}"
+        patterns: "*.deb"
+        file_type: file
+      register: docker_offline_found_packages
+      delegate_to: localhost
+      become: false
+
+    - name: Fail if no Docker packages found
+      ansible.builtin.fail:
+        msg: "No offline Docker .deb packages found in {{ docker_offline_source_dir }}"
+      when: docker_offline_found_packages.matched == 0
+
+    - name: Create temp Docker package directory
+      ansible.builtin.file:
+        path: /tmp/docker-packages
+        state: directory
+        mode: "0755"
+
+    - name: Copy offline Docker packages
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "/tmp/docker-packages/{{ item.path | basename }}"
+        mode: "0644"
+      loop: "{{ docker_offline_found_packages.files }}"
+
+    - name: Install Docker packages in order
+      ansible.builtin.shell: |
+        dpkg -i /tmp/docker-packages/{{ item }}*.deb || apt-get install -f -y
+      loop:
+        - containerd.io
+        - docker-ce-cli
+        - docker-ce_
+        - docker-buildx-plugin
+        - docker-compose-plugin
+      register: docker_install_results
+      changed_when: docker_install_results.rc == 0
