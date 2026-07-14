@@ -4,7 +4,7 @@ all:
     debian:
       hosts:
         machine:
-          ansible_host: 192.168.56.74
+          ansible_host: 192.168.1.1
           ansible_port: 22
 
     rpm:
