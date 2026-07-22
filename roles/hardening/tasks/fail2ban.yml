@@ -3,7 +3,6 @@
   ansible.builtin.package:
     name: fail2ban
     state: present
-  become: true
   tags:
     - fail2ban
 
@@ -15,7 +14,6 @@
     group: root
     mode: "0644"
     backup: true
-  become: true
   notify: Restart Fail2Ban
   tags:
     - fail2ban

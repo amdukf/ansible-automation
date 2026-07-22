@@ -1,0 +1,25 @@
+---
+- name: Ensure that iptables packages are installed
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - iptables
+    - iptables-persistent
+
+- name: Deploy iptables rules
+  ansible.builtin.template:
+    src: iptables.rules.j2
+    dest: /etc/iptables/rules.v4
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: restore iptables state from a file
+  community.general.iptables_state:
+    state: restored
+    path: /etc/iptables/rules.v4
+  async: 10
+  poll: 0
+  notify: Restart iptables
+  ignore_errors: true

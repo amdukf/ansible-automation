@@ -66,3 +66,29 @@ apt_repo_url: http://192.168.56.99:8081/repository/ubuntu/
 apt_repo_user: nx-apt
 apt_security_repo_url: http://192.168.56.99:8081/repository/ubuntu-security/
 apt_security_repo_user: nx-apt
+
+# Iptables
+
+# You can add state for rules too
+# Example:
+  # - proto: tcp
+  #   port: "22"
+  #   state: NEW
+
+iptables_input_rules:
+  - proto: tcp
+    port: "{{ ssh_port }}"
+  - proto: tcp
+    port: 80
+  - proto: tcp
+    port: 443
+iptables_output_rules:
+  - proto: tcp
+    port: 53
+  - proto: udp
+    port: 53
+  - proto: tcp
+    port: 80
+  - proto: tcp
+    port: 443
+

@@ -1,34 +1,40 @@
 ---
 - name: Reload systemd daemon
+  become: true
   ansible.builtin.systemd:
     daemon_reload: true
-  become: true
   listen: Restart SSH
 
 - name: Restart SSH socket
+  become: true
   ansible.builtin.systemd:
     name: ssh.socket
     state: restarted
-  become: true
   listen: Restart SSH
 
 - name: Restart SSH service
+  become: true
   ansible.builtin.systemd:
     name: ssh.service
     state: restarted
-  become: true
   listen: Restart SSH
 
 - name: Restart Fail2Ban
+  become: true
   ansible.builtin.systemd:
     name: fail2ban
     state: restarted
     enabled: true
-  become: true
 
 - name: Restart auditd
+  become: true
   ansible.builtin.systemd:
     name: auditd
     state: restarted
     enabled: true
+  
+- name: Restart iptables
   become: true
+  systemd:
+    name: iptables
+    state: restarted

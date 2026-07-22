@@ -71,6 +71,7 @@
   tags: apt_update
 
 - name: Upgrade apt packages
+  when: apt_upgrade | default(false) | bool
   ansible.builtin.apt:
     upgrade: true
   become: true

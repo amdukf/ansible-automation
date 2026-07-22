@@ -8,6 +8,7 @@
   tags: ssh_hardening
 
 - name: Fail2ban
+  become: true
   ansible.builtin.import_tasks: fail2ban.yml
   tags: fail2ban
 
@@ -24,5 +25,11 @@
   tags: kernel_hardening
 
 - name: Common Hardening
+  become: true
   ansible.builtin.import_tasks: common-hardening.yml
   tags: common_hardening
+
+- name: Iptables Hardening
+  become: true
+  ansible.builtin.import_tasks: iptables.yml
+  tags: iptables_hardening

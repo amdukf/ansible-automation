@@ -1,20 +1,17 @@
 ---
 - name: Set shell session timeout (auto logout after inactivity)
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/profile
     line: 'TMOUT=600'
     state: present
 
 - name: Set secure default umask system-wide
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/profile
     line: 'umask 077' # Or you can use 027
     state: present
 
 - name: Set secure umask in /etc/bash.bashrc
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/bash.bashrc
     line: 'umask 077' # Or you can use 027
@@ -22,7 +19,6 @@
 
 # Controls how many times hashing is repeated.
 - name: Set password hashing rounds
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/login.defs
     regexp: '^#?SHA_CRYPT_MIN_ROUNDS\s+'
@@ -30,7 +26,6 @@
     state: present
 
 - name: Set max password hashing rounds
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/login.defs
     regexp: '^#?SHA_CRYPT_MAX_ROUNDS\s+'
@@ -38,14 +33,12 @@
     state: present
 
 - name: Ensure hostname is mapped locally in /etc/hosts
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/hosts
     line: "127.0.0.1 {{ ansible_hostname }}"
     state: present
 
 - name: Set minimum password age
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/login.defs
     regexp: '^#?PASS_MIN_DAYS\s+'
@@ -53,7 +46,6 @@
     state: present
 
 - name: Set maximum password age
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/login.defs
     regexp: '^#?PASS_MAX_DAYS\s+'
@@ -61,7 +53,6 @@
     state: present
 
 - name: Set UMASK in login.defs
-  become: true
   ansible.builtin.lineinfile:
     path: /etc/login.defs
     regexp: '^UMASK'
@@ -69,7 +60,6 @@
     state: present
 
 - name: Auditd configuration and custom rules
-  become: true
   tags: auditd
   block:
 
