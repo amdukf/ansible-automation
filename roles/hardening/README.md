@@ -178,4 +178,3 @@ Amir (Tyrell) Kheirandish
 DevOps Engineer
 Infrastructure automation • Kubernetes • CI/CD • System hardening
 ```
-A
