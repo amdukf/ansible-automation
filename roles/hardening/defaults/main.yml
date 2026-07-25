@@ -92,3 +92,25 @@ iptables_output_rules:
   - proto: tcp
     port: 443
 
+# UFW settings
+
+ufw_default_input: deny
+ufw_default_output: allow
+ufw_default_forward: deny
+
+ufw_rules:
+
+  - action: allow
+    direction: in
+    port: "{{ ssh_port }}"
+    proto: tcp
+
+  - action: allow
+    direction: in
+    port: 80
+    proto: tcp
+
+  - action: allow
+    direction: in
+    port: 443
+    proto: tcp

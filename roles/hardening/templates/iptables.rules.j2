@@ -4,34 +4,39 @@
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 
-# Allow loopback
+:HARDENING-INPUT -
+:HARDENING-OUTPUT -
+
+# INPUT chain
+
 -A INPUT -i lo -j ACCEPT
--A OUTPUT -o lo -j ACCEPT
-
-# Drop invalid packets
 -A INPUT -m conntrack --ctstate INVALID -j DROP
--A OUTPUT -m conntrack --ctstate INVALID -j DROP
-
-# Allow established and related connections
 -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
--A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-
-# Allow ICMP
--A INPUT -p icmp -j ACCEPT
--A OUTPUT -p icmp -j ACCEPT
-
-# Allowed INPUT rules
-{% for rule in iptables_input_rules %}
--A INPUT -p {{ rule.proto }} --dport {{ rule.port }} -j ACCEPT
-{% endfor %}
-
-# Allowed OUTPUT rules
-{% for rule in iptables_output_rules %}
--A OUTPUT -p {{ rule.proto }} --dport {{ rule.port }} -j ACCEPT
-{% endfor %}
-
-# Drop everything else
+-A INPUT -j HARDENING-INPUT
 -A INPUT -j DROP
+
+# OUTPUT chain
+
+-A OUTPUT -o lo -j ACCEPT
+-A OUTPUT -m conntrack --ctstate INVALID -j DROP
+-A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A OUTPUT -j HARDENING-OUTPUT
 -A OUTPUT -j DROP
+
+# Hardening input rules
+
+-A HARDENING-INPUT -p icmp -j ACCEPT
+{% for rule in iptables_input_rules %}
+-A HARDENING-INPUT -p {{ rule.proto }} --dport {{ rule.port }} -j ACCEPT
+{% endfor %}
+-A HARDENING-INPUT -j RETURN
+
+# Hardening output rules
+
+-A HARDENING-OUTPUT -p icmp -j ACCEPT
+{% for rule in iptables_output_rules %}
+-A HARDENING-OUTPUT -p {{ rule.proto }} --dport {{ rule.port }} -j ACCEPT
+{% endfor %}
+-A HARDENING-OUTPUT -j RETURN
 
 COMMIT

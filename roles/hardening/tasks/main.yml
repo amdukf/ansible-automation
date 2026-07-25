@@ -1,5 +1,4 @@
 ---
-
 - name: Get info
   ansible.builtin.import_tasks: info.yml
   tags: os_info

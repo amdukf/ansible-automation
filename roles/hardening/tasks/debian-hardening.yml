@@ -30,6 +30,13 @@
   tags: common_hardening
 
 - name: Iptables Hardening
+  when: configure_iptables | default(false) | bool
   become: true
-  ansible.builtin.import_tasks: iptables.yml
+  ansible.builtin.import_tasks: firewall-iptables.yml
   tags: iptables_hardening
+
+- name: UFW Hardening
+  when: configure_ufw | default(false) | bool
+  become: true
+  ansible.builtin.import_tasks: firewall-ufw.yml
+  tags: ufw_hardening
