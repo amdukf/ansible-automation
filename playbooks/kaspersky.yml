@@ -1,0 +1,6 @@
+---
+- name: Install Kaspersky services
+  hosts: all
+  gather_facts: true
+  roles:
+    - kaspersky

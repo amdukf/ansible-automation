@@ -1,0 +1,104 @@
+---
+- name: Copy splunk file
+  block:
+    - name: Copy Splunk file with owner and permissions
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /opt
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+      loop:
+        - splunkforwarder-10.4.1-5a009d941268-linux-amd64.tgz
+
+- name: Extract Splunk Forwarder
+  ansible.builtin.unarchive:
+    src: /opt/splunkforwarder-10.4.1-5a009d941268-linux-amd64.tgz
+    dest: /opt/
+    remote_src: yes
+    owner: root
+    group: root
+
+- name: Create SplunkForwarder symlink
+  ansible.builtin.file:
+    src: /opt/splunkforwarder/bin/splunk
+    dest: /usr/bin/SplunkForwarder
+    state: link
+
+- name: Splunk forwarder service
+  expect:
+    command: /opt/splunkforwarder/bin/splunk start --accept-license
+    timeout: 60
+    responses:
+        (.*)Please enter an administrator username(.*): "{{ splunk_user }}"
+        (.*)Please enter a new password(.*): "{{ splunk_pass }}"
+        (.*)Please confirm new password(.*): "{{ splunk_pass }}"
+
+- name: Change Splunk Forwarder ownership
+  ansible.builtin.file:
+    path: /opt/splunkforwarder
+    owner: root
+    group: root
+    recurse: yes
+
+- name: Stop Splunk Forwarder
+  ansible.builtin.command:
+    cmd: /opt/splunkforwarder/bin/splunk stop
+  async: 10
+  poll: 0
+
+- name: Wait 10 seconds
+  ansible.builtin.pause:
+    seconds: 10
+
+- name: Disable boot-start
+  ansible.builtin.command:
+    cmd: /opt/splunkforwarder/bin/splunk disable boot-start
+  ignore_errors: true
+
+- name: Enable boot-start
+  ansible.builtin.command:
+    cmd: /opt/splunkforwarder/bin/splunk enable boot-start -user root
+
+- name: Start Splunk Forwarder
+  ansible.builtin.command:
+    cmd: /opt/splunkforwarder/bin/splunk start
+
+- name: Configure Splunk Deployment Server
+  expect:
+    command: >
+      /opt/splunkforwarder/bin/splunk set deploy-poll 10.60.1.66:8089 --accept-license
+    timeout: 60
+    responses:
+      (.*)Splunk username(.*): "{{ splunk_user }}"
+      (.*)Password:(.*): "{{ splunk_pass }}"
+
+- name: Add Splunk monitors
+  expect:
+    command: >
+      /opt/splunkforwarder/bin/splunk add monitor "{{ item }}"
+    timeout: 60
+    responses:
+      (.*)Splunk username(.*): "{{ splunk_user }}"
+      (.*)Password:(.*): "{{ splunk_pass }}"
+  loop:
+    - /var/log/auth.log
+    - /var/log/syslog
+    - /var/log/kern.log
+    - /var/log/journal/*
+
+- name: Start Splunk Forwarder service
+  ansible.builtin.systemd:
+    name: SplunkForwarder
+    state: started
+
+- name: Check Splunk Forwarder service status
+  ansible.builtin.systemd:
+    name: SplunkForwarder
+  register: splunk_service_status
+
+- name: Show Splunk Forwarder status
+  ansible.builtin.debug:
+    msg:
+      - "State: {{ splunk_service_status.status.ActiveState }}"
+      - "Enabled: {{ splunk_service_status.status.UnitFileState }}"

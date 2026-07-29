@@ -1,0 +1,14 @@
+---
+- name: Ensure that Splunk Platform is installed
+  ansible.builtin.import_tasks: ensure-install.yml
+  tags: ensure-splunk-install
+
+- name: Install Splunk Forwarder
+  become: true
+  ansible.builtin.import_tasks: splunk-forwarder-installation.yml
+  tags: splunkforwarder-install
+
+- name: Uninstall Splunk Forwarder
+  become: true
+  ansible.builtin.import_tasks: splunk-forwarder-uninstall.yml
+  tags: splunkforwarder-uninstall

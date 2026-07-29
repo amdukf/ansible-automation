@@ -3,9 +3,20 @@ all:
   children:
     debian:
       hosts:
-        machine:
+        redis-1:
+          ansible_host: 192.168.26.20
+          ansible_port: 22
+        redis-2:
+          ansible_host: 192.168.26.21
+          ansible_port: 22
+        redis-3:
+          ansible_host: 192.168.26.22
+          ansible_port: 22
+        dify:
+          ansible_host: 192.168.26.88
+          ansible_port: 22
+        pracauto:
           ansible_host: 192.168.56.74
-          ansible_port: 23389
-
+          ansible_port: 22
     rpm:
       hosts: {}

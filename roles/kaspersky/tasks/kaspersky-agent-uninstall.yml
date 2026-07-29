@@ -1,0 +1,33 @@
+---
+- name: Uninstall Kaspersky Network Agent
+  block:
+    - name: Check if Kaspersky Network Agent is installed
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Stop Kaspersky Network Agent service
+      ansible.builtin.systemd:
+        name: klnagent64
+        state: stopped
+      when: "'klnagent64' in ansible_facts.packages"
+
+    - name: Remove Kaspersky Network Agent package
+      ansible.builtin.apt:
+        name: klnagent64
+        state: absent
+        purge: true
+        autoremove: true
+      when: "'klnagent64' in ansible_facts.packages"
+
+    - name: Remove remaining Kaspersky Network Agent files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /opt/kaspersky/klnagent64
+        - /var/opt/kaspersky/klnagent64
+        - /etc/systemd/system/klnagent64.service
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: true

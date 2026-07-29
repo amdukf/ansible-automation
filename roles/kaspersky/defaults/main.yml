@@ -1,0 +1,7 @@
+---
+# Optional manual override
+kaspersky_server_override: ""
+
+kaspersky_server_map:
+  "10.60": "10.60.4.12"
+  "10.82": "10.82.2.5"

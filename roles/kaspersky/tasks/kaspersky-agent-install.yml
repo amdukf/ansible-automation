@@ -1,0 +1,91 @@
+---
+- name: Copy kaspersky file
+  block:
+    - name: Create kaspersky directory for installer files
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/kaspterkyfiles2026"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0700"
+
+    - name: Copy Kaspersky file with owner and permissions
+      ansible.builtin.copy:
+        src: "deb/{{ item }}"
+        dest: "{{ ansible_env.HOME }}/kaspterkyfiles2026"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+      loop:
+        - klnagent64_15.3.0-392_amd64.deb
+        - kesl_12.2.0-2412_amd64.deb
+
+- name: Collect all IPv4 addresses
+  ansible.builtin.set_fact:
+    host_ips: >-
+      {{
+        ansible_all_ipv4_addresses
+      }}
+
+- name: Show detected IPs
+  ansible.builtin.debug:
+    var: host_ips
+
+- name: Initialize Kaspersky server
+  ansible.builtin.set_fact:
+    kaspersky_server: ""
+
+- name: Set Kaspersky server from manual override
+  ansible.builtin.set_fact:
+    kaspersky_server: "{{ kaspersky_server_override }}"
+  when:
+    - kaspersky_server_override | length > 0
+
+- name: Detect Kaspersky server from IP ranges
+  ansible.builtin.set_fact:
+    kaspersky_server: "{{ item.1.value }}"
+  loop: "{{ host_ips | product(kaspersky_server_map | dict2items) | list }}"
+  when:
+    - kaspersky_server_override | length == 0
+    - item.0.startswith(item.1.key + '.')
+
+- name: Fail if Kaspersky server cannot be determined
+  ansible.builtin.fail:
+    msg: >
+      Cannot determine Kaspersky Server.
+      Host IPs: {{ host_ips }}
+      Please define kaspersky_server_override.
+  when:
+    - kaspersky_server is not defined
+
+- name: Copy Kaspersky auto answer file
+  ansible.builtin.template:
+    src: klnagent_answers.j2
+    dest: /tmp/klnagent_answers
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Install Kaspersky Network Agent silently
+  ansible.builtin.command:
+    cmd: >
+      apt install -y {{ ansible_env.HOME }}/kaspterkyfiles2026/klnagent64_15.3.0-392_amd64.deb
+  environment:
+    KLAUTOANSWERS: /tmp/klnagent_answers
+  register: klnagent_install
+  changed_when: "'Kaspersky Network Agent is installed' in klnagent_install.stdout"
+
+- name: Enable and start Kaspersky Network Agent
+  ansible.builtin.systemd:
+    name: klnagent64
+    enabled: true
+    state: started
+
+- name: Check Kaspersky Network Agent service
+  ansible.builtin.systemd:
+    name: klnagent64
+  register: klnagent_status
+
+- name: Show Kaspersky Network Agent status
+  ansible.builtin.debug:
+    msg: "{{ klnagent_status.status.ActiveState }}"

@@ -1,0 +1,14 @@
+---
+- name: Ensure Kaspersky services are installed and running
+  ansible.builtin.import_tasks: ensure-install.yml
+  tags: ensure-kasper-install
+
+- name: Install Kaspersky agent
+  become: true
+  ansible.builtin.import_tasks: kaspersky-agent-install.yml
+  tags: kasper-agent-install
+
+- name: Uninstall Kaspersky agent
+  become: true
+  ansible.builtin.import_tasks: kaspersky-agent-uninstall.yml
+  tags: kasper-agent-uninstall

@@ -1,0 +1,8 @@
+---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Find Splunk service
+  ansible.builtin.debug:
+    msg: "{{ item.key }} -> {{ item.value.state }}"
+  loop: "{{ ansible_facts.services | dict2items | selectattr('key', 'match', '.*[Ss]plunk.*') | list }}"

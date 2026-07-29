@@ -1,0 +1,6 @@
+---
+- name: Install Splunk Platform
+  hosts: all
+  gather_facts: true
+  roles:
+    - splunk
