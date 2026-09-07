@@ -18,5 +18,8 @@ all:
         pracauto:
           ansible_host: 192.168.56.74
           ansible_port: 22
+        adaai:
+          ansible_host: 192.168.5.30
+          ansible_port: 2112
     rpm:
       hosts: {}

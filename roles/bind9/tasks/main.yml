@@ -1,0 +1,15 @@
+---
+- name: Add DNS A record
+  become: true
+  ansible.builtin.import_tasks: add-record.yml
+  tags: add-record
+
+- name: Update DNS A record
+  become: true
+  ansible.builtin.import_tasks: update-record.yml
+  tags: update-record
+
+- name: Delete DNS A record
+  become: true
+  ansible.builtin.import_tasks: delete-record.yml
+  tags: delete-record

@@ -3,7 +3,7 @@
   block:
     - name: Create kaspersky directory for installer files
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/kaspterkyfiles2026"
+        path: "{{ kaspersky_klnagent_install_path }}"
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
@@ -11,14 +11,11 @@
 
     - name: Copy Kaspersky file with owner and permissions
       ansible.builtin.copy:
-        src: "deb/{{ item }}"
-        dest: "{{ ansible_env.HOME }}/kaspterkyfiles2026"
+        src: "{{ kaspersky_klnagent_package_src }}"
+        dest: "{{ kaspersky_klnagent_install_path }}"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: '0644'
-      loop:
-        - klnagent64_15.3.0-392_amd64.deb
-        - kesl_12.2.0-2412_amd64.deb
 
 - name: Collect all IPv4 addresses
   ansible.builtin.set_fact:
@@ -69,7 +66,7 @@
 - name: Install Kaspersky Network Agent silently
   ansible.builtin.command:
     cmd: >
-      apt install -y {{ ansible_env.HOME }}/kaspterkyfiles2026/klnagent64_15.3.0-392_amd64.deb
+      apt install -y {{ kaspersky_klnagent_install_path }}/{{ kaspersky_klnagent_package }}
   environment:
     KLAUTOANSWERS: /tmp/klnagent_answers
   register: klnagent_install

@@ -1,0 +1,6 @@
+---
+- name: Bind9 configuration
+  hosts: all
+  gather_facts: true
+  roles:
+    - bind9

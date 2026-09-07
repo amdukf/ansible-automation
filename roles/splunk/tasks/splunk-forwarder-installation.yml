@@ -1,4 +1,33 @@
 ---
+- name: Remove Splunk Universal Forwarder
+  block:
+    - name: Check if Splunk Forwarder exists
+      ansible.builtin.stat:
+        path: /opt/splunkforwarder/bin/splunk
+      register: splunk_stat
+
+    - name: Stop Splunk Forwarder
+      ansible.builtin.command: /opt/splunkforwarder/bin/splunk stop
+      when: splunk_stat.stat.exists
+      ignore_errors: true
+
+    - name: Disable Splunk boot-start
+      ansible.builtin.command: /opt/splunkforwarder/bin/splunk disable boot-start
+      when: splunk_stat.stat.exists
+      ignore_errors: true
+
+    - name: Remove Splunk Forwarder directory
+      ansible.builtin.file:
+        path: /opt/splunkforwarder
+        state: absent
+      when: splunk_stat.stat.exists
+
+    - name: Remove SplunkForwarder symlink/binary
+      ansible.builtin.file:
+        path: /usr/bin/SplunkForwarder
+        state: absent
+      when: splunk_stat.stat.exists
+
 - name: Copy splunk file
   block:
     - name: Copy Splunk file with owner and permissions
@@ -59,6 +88,7 @@
 - name: Enable boot-start
   ansible.builtin.command:
     cmd: /opt/splunkforwarder/bin/splunk enable boot-start -user root
+  ignore_errors: true
 
 - name: Start Splunk Forwarder
   ansible.builtin.command:

@@ -1,0 +1,45 @@
+---
+- name: Copy kaspersky file
+  block:
+    - name: Create kaspersky directory for installer files
+      ansible.builtin.file:
+        path: "{{ kaspersky_kesl_install_path }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0700"
+
+    - name: Copy Kaspersky kesl file with owner and permissions
+      ansible.builtin.copy:
+        src: "{{ kaspersky_kesl_package_src }}"
+        dest: "{{ kaspersky_kesl_install_path }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+- name: Install KESL package
+  ansible.builtin.apt:
+    deb: "{{ kaspersky_kesl_install_path }}/{{ kaspersky_kesl_package }}"
+    state: present
+
+- name: Copy KESL autoinstall configuration
+  ansible.builtin.template:
+    src: autoinstall.ini.j2
+    dest: /tmp/autoinstall.ini
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Run KESL initial configuration
+  ansible.builtin.command:
+    cmd: >
+      /opt/kaspersky/kesl/bin/kesl-setup.pl
+      --autoinstall=/tmp/autoinstall.ini
+  register: kesl_setup
+  changed_when: "'already configured' not in kesl_setup.stdout"
+
+- name: Enable KESL service
+  ansible.builtin.systemd:
+    name: kesl
+    enabled: true
+    state: started

@@ -5,3 +5,12 @@ kaspersky_server_override: ""
 kaspersky_server_map:
   "10.60": "10.60.4.12"
   "10.82": "10.82.2.5"
+
+
+kaspersky_klnagent_package: "klnagent64_15.3.0-392_amd64.deb"
+kaspersky_klnagent_package_src: "deb/{{ kaspersky_klnagent_package }}"
+kaspersky_klnagent_install_path: "{{ ansible_env.HOME }}/kaspterkyfiles2026/"
+
+kaspersky_kesl_package: "kesl_12.2.0-2412_amd64.deb"
+kaspersky_kesl_package_src: "deb/{{ kaspersky_kesl_package }}"
+kaspersky_kesl_install_path: "{{ ansible_env.HOME }}/kaspterkyfiles2026/"

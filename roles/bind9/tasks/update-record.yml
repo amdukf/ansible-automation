@@ -1,0 +1,71 @@
+---
+
+- name: Check if DNS record exists
+  become: true
+  ansible.builtin.shell:
+    cmd: >
+      grep -E '^{{ record_name | regex_escape }}[ \t]+(IN[ \t]+)?{{ record_type | regex_escape }}[ \t]+'
+      {{ zone_file }}
+  register: existing_record
+  changed_when: false
+  failed_when: false
+
+- name: Update DNS record
+  become: true
+  ansible.builtin.replace:
+    path: "{{ zone_file }}"
+    regexp: '^{{ record_name | regex_escape }}[ \t]+(IN[ \t]+)?{{ record_type | regex_escape }}[ \t]+.*$'
+    replace: "{{ record_name }}    IN    {{ record_type }}    {{ record_value }}"
+  register: record_updated
+  when: existing_record.rc == 0
+
+- name: Fail if DNS record does not exist
+  ansible.builtin.fail:
+    msg: "DNS record '{{ record_name }} {{ record_type }}' does not exist"
+  when: existing_record.rc != 0
+
+- name: Read current zone serial
+  become: true
+  ansible.builtin.shell:
+    cmd: >
+      awk '/;[[:space:]]*Serial/ {
+        gsub(/[[:space:]]/, "", $1);
+        print $1;
+        exit
+      }' {{ zone_file }}
+  register: current_serial
+  changed_when: false
+  when: record_updated.changed
+
+- name: Calculate new serial
+  ansible.builtin.set_fact:
+    new_serial: "{{ current_serial.stdout | int + 1 }}"
+  when: record_updated.changed
+
+- name: Update zone serial
+  become: true
+  ansible.builtin.replace:
+    path: "{{ zone_file }}"
+    regexp: '(^\s*)[0-9]+(\s*;\s*Serial)'
+    replace: '\g<1>{{ new_serial }}\g<2>'
+  when: record_updated.changed
+
+- name: Validate BIND configuration
+  become: true
+  ansible.builtin.command:
+    cmd: named-checkconf
+  changed_when: false
+
+# - name: Validate DNS zone
+#   become: true
+#   ansible.builtin.command:
+#     cmd: "named-checkzone {{ zone }} {{ zone_file }}"
+#   register: zone_check
+#   changed_when: false
+
+- name: Reload BIND zone
+  become: true
+  ansible.builtin.command:
+    cmd: "rndc reload"
+  when:
+    - record_updated.changed

@@ -12,3 +12,13 @@
   become: true
   ansible.builtin.import_tasks: kaspersky-agent-uninstall.yml
   tags: kasper-agent-uninstall
+
+- name: Install Kaspersky kesl
+  become: true
+  ansible.builtin.import_tasks: kaspersky-kesl-install.yml
+  tags: kasper-kesl-install
+
+- name: Uninstall Kaspersky kesl
+  become: true
+  ansible.builtin.import_tasks: kaspersky-kesl-uninstall.yml
+  tags: kasper-kesl-uninstall

@@ -1,0 +1,12 @@
+---
+# zone: "test.local"
+zone_file: "/etc/bind/zones/db.test.local"
+
+# Types of DNS records to manage => A, CNAME, NS, MX, TXT, AAAA, PTR, SRV, SPF, etc.
+
+record_type: "CNAME"
+
+record_name: "dog"
+
+record_value: "sheep.test.local."
+
