@@ -9,6 +9,9 @@ The roles are designed to be reusable, modular, and easy to maintain. They can b
 - docker
 - hardening
 - networking
+- bind9
+- splunk
+- kaspersky
 
 ### Linux Hardening
 
